@@ -1,0 +1,55 @@
+# Hand-written Makefile for various tasks in the bib directory
+
+articles_to_fetch.pdf:	FORCE articles_to_fetch.tex
+	make clean
+	pdflatex articles_to_fetch.tex
+	bibtex articles_to_fetch
+	pdflatex articles_to_fetch.tex
+	pdflatex articles_to_fetch.tex
+
+articles_to_fetch.tex:		articles_to_fetch.bib
+		echo '\documentclass{article}' >articles_to_fetch.tex
+		echo '\usepackage{url}' >> articles_to_fetch.tex
+		echo '\\begin{document}' >> articles_to_fetch.tex
+		sed -n 's/^@.*{\([^,]*\),/\\cite{\1}/p' articles_to_fetch.bib >>articles_to_fetch.tex
+		echo '\\bibliography{eem}' >> articles_to_fetch.tex
+		echo '\\bibliographystyle{plain}' >> articles_to_fetch.tex
+		echo '\\end{document}' >> articles_to_fetch.tex
+
+bib.pdf:	FORCE bib.tex
+	make clean
+	pdflatex bib.tex
+	bibtex bib
+	pdflatex bib.tex
+	pdflatex bib.tex
+
+bib.tex:		eem.bib
+		echo '\documentclass{article}' >bib.tex
+		echo '\usepackage{url}' >> bib.tex
+		echo '\\begin{document}' >> bib.tex
+		sed -n 's/^@.*{\([^,]*\),/\\cite{\1}/p' eem.bib >>bib.tex
+		echo '\\bibliography{eem}' >> bib.tex
+		echo '\\bibliographystyle{plain}' >> bib.tex
+		echo '\\end{document}' >> bib.tex
+
+# Make check.aiaa.bbl and check.mpdi.bbl for inclusion
+# in publications
+
+aiaa.bbl:	FORCE eem.bib
+		../bin/checkbib ./eem.bib aiaa
+		cp checkdir/check.aiaa.bbl aiaa.bbl
+
+mdpi.bbl:	FORCE eem.bib
+		../bin/checkbib ./eem.bib mdpi
+		cp checkdir/check.mdpi.bbl mdpi.bbl
+
+FORCE:
+
+clean:
+	rm -f \
+	bib.aux \
+	bib.bbl \
+	bib.blg \
+	bib.log \
+	bib.out \
+	bib.pdf
